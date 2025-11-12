@@ -10,7 +10,7 @@ let connecting = false
 let askingNumber = false
 let useQR
 
-const SESSION_FOLDER = 'Arcane_Session'
+const SESSION_FOLDER = 'Komodo_Session'
 
 // Función para formatear el Pairing Code
 function formatPairingCode(code) {
@@ -115,3 +115,4 @@ async function startBot() {
 }
 
 startBot()
+
