@@ -12,13 +12,11 @@ let useQR
 
 const SESSION_FOLDER = 'Komodo_Session'
 
-// Función para formatear el Pairing Code
 function formatPairingCode(code) {
     if (!code || code.length !== 8) return code
     return `${code.slice(0, 4)}-${code.slice(4)}`
 }
 
-// Función para verificar si existen credenciales guardadas
 function sessionExists() {
     if (!fs.existsSync(SESSION_FOLDER)) return false
     const files = fs.readdirSync(SESSION_FOLDER)
@@ -31,12 +29,10 @@ async function startBot() {
 
     const { state, saveCreds } = await useMultiFileAuthState(SESSION_FOLDER)
 
-    // ---------- DETECCIÓN DE SESIÓN ----------
     if (sessionExists()) {
         console.log(chalk.yellow('[ ⸙ ] Cargando sesión...'))
-        useQR = true // solo para continuar, no importa el valor
+        useQR = true
     } else if (useQR === undefined) {
-        // Si no hay sesión, preguntar al usuario
         console.log(chalk.greenBright('\n[ ⸙ ] Selecciona cómo deseas conectarte:'))
         console.log(chalk.yellow('1 - QR'))
         console.log(chalk.yellow('2 - CODE'))
@@ -57,7 +53,6 @@ async function startBot() {
         useQR = option === '1'
     }
 
-    // ---------- CREACIÓN DEL SOCKET ----------
     const sock = makeWASocket({ auth: state, logger: P({ level: 'silent' }) })
 
     sock.ev.on('creds.update', saveCreds)
@@ -70,14 +65,12 @@ async function startBot() {
             if (result.shouldReconnect) startBot()
         }
 
-        // Mostrar QR si corresponde
         if (useQR && update.qr) {
             console.log(chalk.greenBright('\n[ ⸙ ] Escanea este QR con tu WhatsApp:'))
             console.log(chalk.greenBright('───────────────────────────────────────────'))
             qrcode.generate(update.qr, { small: true })
         }
 
-        // Solicitar Pairing Code si se seleccionó CODE
         if (!useQR && !sock.authState.creds.registered && !askingNumber) {
             askingNumber = true
 
@@ -105,14 +98,13 @@ async function startBot() {
         }
     })
 
-    // ---------- MENSAJES ----------
+    // Aquí ahora se llama **m**, no msg
     sock.ev.on('messages.upsert', async ({ messages }) => {
-        const msg = messages[0]
-        if (!msg.message) return
+        const m = messages[0]
+        if (!m.message) return
 
-        LogMessage(msg, sock)
+        LogMessage(m, sock)
     })
 }
 
 startBot()
-
